@@ -22,8 +22,8 @@ func main() {
 
 	defer conn.Close()
 
-	go recv(conn)
 	go prompt(conn)
+	go recv(conn)
 
 	wg.Wait()
 }
@@ -35,29 +35,31 @@ func prompt(conn net.Conn) {
 		if ok := scanner.Scan(); !ok {
 			if err := scanner.Err(); err != nil {
 				fmt.Println("Error scanner:", err)
-				wg.Done()
 				return
 			}
 		}
 
-		_, err := conn.Write([]byte(scanner.Text()))
+		msg := fmt.Sprintf("%s\n", scanner.Text())
+
+		_, err := conn.Write([]byte(msg))
 		if err != nil {
 			fmt.Println("Error conn.Write:", err)
-			wg.Done()
 			return
 		}
 	}
 }
 
 func recv(listener net.Conn) {
+	defer wg.Done()
+	reader := bufio.NewReader(listener)
+
 	for {
-		buffer := make([]byte, 1024)
-		_, err := listener.Read(buffer)
+		msg, err := reader.ReadString('\n')
 		if err != nil && err != io.EOF {
 			fmt.Println("Error:", err)
-			break
+			return
 		}
 
-		fmt.Println(string(buffer))
+		fmt.Println("[x]", msg)
 	}
 }
