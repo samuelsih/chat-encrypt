@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/kyokomi/emoji/v2"
 	"github.com/samuelsih/chat-encrypt/des"
 )
 
@@ -67,26 +68,38 @@ func recv(listener net.Conn) {
 			continue
 		}
 
-		msg := fucku(response)
+		if response == "EXIT\n" {
+			return
+		}
 
-		fmt.Println("[x]", msg)
+		msg := resp(response)
+
+		fmt.Println(msg)
 	}
 }
 
-func fucku(msg string) string {
-	cmd := strings.Split(msg, " ")
+func resp(msg string) string {
+	input := sanitize(msg)
+	cmd := strings.Split(input, " ")
+	defaultMsg := strings.Join(cmd[1:], " ")
 
 	switch cmd[0] {
 	case "RESPUSR":
-		return strings.Join(cmd[1:], " ")
+		return emoji.Sprintf(":man: %s", defaultMsg)
 	case "ERROR":
-		return strings.Join(cmd[1:], " ")
+		return emoji.Sprintf(":error: %s", defaultMsg)
 	case "LEAVE":
-		return strings.Join(cmd[1:], " ")
+		return emoji.Sprintf(":door: %s", defaultMsg)
 	case "RESPMSG":
 		decryptedMsg := des.Decrypt(cmd[2], des.DecryptionBase64)
-		return fmt.Sprintf("%s %s", cmd[1], decryptedMsg)
+		return emoji.Sprintf(":letter: %s %s", cmd[1], decryptedMsg)
 	default:
-		return "Invalid message protocol sent by server"
+		return emoji.Sprint(":gorilla: Invalid message protocol sent by server")
 	}
+}
+
+func sanitize(s string) string {
+	trimSpaced := strings.TrimSpace(s)
+	trimRight := strings.TrimRight(trimSpaced, "\r\n")
+	return strings.TrimRight(trimRight, "\n")
 }

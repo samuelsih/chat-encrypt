@@ -34,6 +34,18 @@ func exec(conn net.Conn, msg string) error {
 
 		encryptedMsg := des.Encrypt(strings.Join(cmd[1:], " "), des.EncryptionBase64)
 		return clients.Broadcast(fmt.Sprintf("RESPMSG %s: %s\n", username, encryptedMsg))
+
+	case "EXIT":
+		if len(cmd) > 1 {
+			return singleSend(conn, "Unknown command. Please write correct command\n")
+		}
+
+		_, exist := clients.FindUsernameByRemoteAddr(remoteAddr)
+		if !exist {
+			return singleSend(conn, "ERROR Unknown user\n")
+		}
+
+		return singleSend(conn, "EXIT\n")
 	default:
 		return singleSend(conn, "Unknown command. Please write correct command\n")
 	}

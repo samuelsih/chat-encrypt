@@ -19,7 +19,7 @@ func (m *clients[K, V]) detectDisconnect(username K, conn V) {
 			ping(conn, disconnect)
 		case <-disconnect:
 			m.deleteByUsername(username)
-			m.Broadcast(fmt.Sprintf("LEAVE User %s has disconnect from server\n", username))
+			m.Broadcast(fmt.Sprintf("LEAVE User %s has leave from server\n", username))
 			return
 		}
 	}
@@ -30,6 +30,7 @@ func ping(conn net.Conn, disconnect chan<- struct{}) {
 		n, err := conn.Write([]byte("PING\n"))
 		if err != nil || n == 0 {
 			disconnect <- struct{}{}
+			conn.Close()
 		}
 	}()
 }
