@@ -37,7 +37,7 @@ func exec(conn net.Conn, msg string) error {
 
 	case "EXIT":
 		if len(cmd) > 1 {
-			return singleSend(conn, "Unknown command. Please write correct command\n")
+			return singleSend(conn, "ERROR Unnecessary extra cmd on EXIT\n")
 		}
 
 		_, exist := clients.FindUsernameByRemoteAddr(remoteAddr)
