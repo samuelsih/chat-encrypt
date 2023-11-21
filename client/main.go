@@ -6,7 +6,10 @@ import (
 	"io"
 	"net"
 	"os"
+	"strings"
 	"sync"
+
+	"github.com/samuelsih/chat-encrypt/des"
 )
 
 var wg sync.WaitGroup
@@ -54,12 +57,36 @@ func recv(listener net.Conn) {
 	reader := bufio.NewReader(listener)
 
 	for {
-		msg, err := reader.ReadString('\n')
+		response, err := reader.ReadString('\n')
 		if err != nil && err != io.EOF {
 			fmt.Println("Error:", err)
 			return
 		}
 
+		if response == "PING\n" {
+			continue
+		}
+
+		msg := fucku(response)
+
 		fmt.Println("[x]", msg)
+	}
+}
+
+func fucku(msg string) string {
+	cmd := strings.Split(msg, " ")
+
+	switch cmd[0] {
+	case "RESPUSR":
+		return strings.Join(cmd[1:], " ")
+	case "ERROR":
+		return strings.Join(cmd[1:], " ")
+	case "LEAVE":
+		return strings.Join(cmd[1:], " ")
+	case "RESPMSG":
+		decryptedMsg := des.Decrypt(cmd[2], des.DecryptionBase64)
+		return fmt.Sprintf("%s %s", cmd[1], decryptedMsg)
+	default:
+		return "Invalid message protocol sent by server"
 	}
 }

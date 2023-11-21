@@ -25,33 +25,30 @@ func main() {
 			break
 		}
 
+		fmt.Println("Connection established", conn.RemoteAddr().String())
 		go handleClient(conn)
 	}
 }
 
 func handleClient(conn net.Conn) {
 	defer conn.Close()
-	writer := bufio.NewWriter(conn)
+	reader := bufio.NewReader(conn)
 
 	for {
-		buffer := make([]byte, 1024)
-		n, err := conn.Read(buffer)
-		if err != nil && err != io.EOF {
-			fmt.Println("Error:", err)
-			return
-		}
-
-		fmt.Printf("Received: %s\n", buffer[:n])
-		_, err = writer.WriteString(fmt.Sprintf("You send: %s", string(buffer)))
+		msg, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("Error Write:", err)
+			if err != io.EOF {
+				fmt.Println("Error:", err)
+				return
+			}
+		}
+
+		if len(msg) <= 1 {
 			return
 		}
 
-		if err := writer.Flush(); err != nil {
-			fmt.Println("Error Flush:", err)
-			return
-		}
+		fmt.Printf("Received: %s", msg)
+
+		exec(conn, msg)
 	}
-
 }
