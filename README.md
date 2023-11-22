@@ -1,5 +1,11 @@
 # chat-encrypt
 
+### How To Run
+
+1. Make sure you have Makefile
+2. For server, run `make serverx`
+3. For client, run `make clientx`
+
 ### Directional Protocol
 
 #### This protocol is sent by the server without user request
