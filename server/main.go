@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net"
+
+	"github.com/samuelsih/chat-encrypt/des"
 )
 
 func main() {
@@ -47,8 +49,7 @@ func handleClient(conn net.Conn) {
 			return
 		}
 
-		fmt.Printf("Received: %s", msg)
-
-		exec(conn, msg)
+		decryptedTxt := des.Decrypt(msg, des.DecryptionBase64)
+		exec(conn, decryptedTxt)
 	}
 }

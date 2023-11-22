@@ -43,9 +43,10 @@ func prompt(conn net.Conn) {
 			}
 		}
 
-		msg := fmt.Sprintf("%s\n", scanner.Text())
+		msg := fmt.Sprintf("%s", scanner.Text())
+		encryptedTxt := des.Encrypt(msg, des.EncryptionBase64)
 
-		_, err := conn.Write([]byte(msg))
+		_, err := conn.Write([]byte(encryptedTxt + "\n"))
 		if err != nil {
 			fmt.Println("Error conn.Write:", err)
 			return
@@ -92,7 +93,7 @@ func resp(msg string) string {
 		return emoji.Sprintf(":door: %s", defaultMsg)
 	case "RESPMSG":
 		decryptedMsg := des.Decrypt(cmd[2], des.DecryptionBase64)
-		return emoji.Sprintf(":letter: %s %s", cmd[1], decryptedMsg)
+		return emoji.Sprintf(":kiss: %s %s", cmd[1], decryptedMsg)
 	default:
 		return emoji.Sprint(":gorilla: Invalid message protocol sent by server")
 	}

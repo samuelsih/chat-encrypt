@@ -1,6 +1,7 @@
 package des
 
 import (
+	"os"
 	"strings"
 
 	"github.com/samuelsih/chat-encrypt/des/table"
@@ -23,7 +24,8 @@ const (
 )
 
 func blockKeys() []string {
-	return generateKeys("12345678")
+	envKeys := os.Getenv("DES_KEY")
+	return generateKeys(envKeys)
 }
 
 func split(s string, size int) []string {
